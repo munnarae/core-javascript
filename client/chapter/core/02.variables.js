@@ -56,10 +56,9 @@ const productInfomation = '';
 // rejected 실패
 
 
-const PANDING = 'api/panding';
 const LOADING = 'api/loading';
 const FULFILLED = 'api/fulfilled';
-const REJECTED = 'api/rejected';
+const REJECTED = 'api/rejected';*/
 
 
 
