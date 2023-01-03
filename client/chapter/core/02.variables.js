@@ -6,6 +6,7 @@
 let admin;
 let name;
 
+
 name = 'John';
 
 admin = name;
@@ -72,3 +73,6 @@ const REJECTED = 'api/rejected';*/
 var nickName = 'tiger';
 
 let nickName2 = 'tiger'; // Temporal Dead Zone  (임시 사망 지역, 임시 사각 지역)
+
+
+console.log();
