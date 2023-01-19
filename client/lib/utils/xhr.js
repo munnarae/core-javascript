@@ -6,9 +6,12 @@
   4: complete // 완료 
   */
 
+import { typeError } from "../error/typeError.js";
+
 // xhrData 함수 만들기 method, url
 
-function xhrData({
+//  콜백 방식
+export function xhrData({
   url = "",
   method = "GET",
   body = null,
@@ -44,22 +47,10 @@ function xhrData({
       onFail("통신 실패");
     }
   });
+
   // 서버에 요청
   xhr.send(JSON.stringify(body));
 }
-
-/* 
-xhrData({
-  url:'https://jsonplaceholder.typicode.com/users/1',
-  method:'POST',
-  onSuccess: (result)=>{
-    console.log(result);
-  },
-  onFail:(err)=>{
-    console.error(err);
-  }
-})
- */
 
 // shorthand property
 
@@ -101,69 +92,150 @@ xhrData.delete = (url, body, onSuccess, onFail) => {
 };
 
 /* 
-xhrData.delete(
-  'https://jsonplaceholder.typicode.com/users/3',
-  (result)=>{
-    console.log(result);
-  },
-  (err)=>{
-    console.log(err);
-  }
-)
-
- */
-
-/* 
-xhrData('POST','https://jsonplaceholder.typicode.com/users',{
-  "name": "kindtiger",
-  "username": "seonbeom",
-  "email": "tiger@euid.dev",
-  "address": {
-    "street": "Kulas Light",
-    "suite": "Apt. 556",
-    "city": "Gwenborough",
-    "zipcode": "92998-3874",
-    "geo": {
-      "lat": "-37.3159",
-      "lng": "81.1496"
+  xhrData.delete(
+    'https://jsonplaceholder.typicode.com/users/3',
+    (result)=>{
+      console.log(result);
+    },
+    (err)=>{
+      console.log(err);
     }
-  },
-  "phone": "010-7169-0262",
-  "website": "hildegard.org",
-  "company": {
-    "name": "Romaguera-Crona",
-    "catchPhrase": "Multi-layered client-server neural-net",
-    "bs": "harness real-time e-markets"
-  }
-})
- */
+  )
+  
+   */
 
 /* 
+  xhrData('POST','https://jsonplaceholder.typicode.com/users',{
+    "name": "kindtiger",
+    "username": "seonbeom",
+    "email": "tiger@euid.dev",
+    "address": {
+      "street": "Kulas Light",
+      "suite": "Apt. 556",
+      "city": "Gwenborough",
+      "zipcode": "92998-3874",
+      "geo": {
+        "lat": "-37.3159",
+        "lng": "81.1496"
+      }
+    },
+    "phone": "010-7169-0262",
+    "website": "hildegard.org",
+    "company": {
+      "name": "Romaguera-Crona",
+      "catchPhrase": "Multi-layered client-server neural-net",
+      "bs": "harness real-time e-markets"
+    }
+  })
+   */
 
-let movePage = function (주소,성공,실패){
+/* 
+  
+  let movePage = function (주소,성공,실패){
+  
+    // 조건에 따라 조건이 잘 맞으면 성공() || 실패()
+  
+    if(주소 === '네이버'){
+      성공(주소);
+    }else{
+      실패();
+    }
+  
+  };
+  
+  movePage(
+    '네이바',
+    (주소)=>{
+      console.log('3초후 '+ 주소 +'로 이동합니다.');
+      setTimeout(() => {
+        window.location.href = 'https://www.naver.com/'
+      }, 3000);
+    }
+    ,
+    ()=>{
+      console.log('잘못된 주소를 입력했습니다.');
+    })
+  
+  
+   */
 
-  // 조건에 따라 조건이 잘 맞으면 성공() || 실패()
+// promise API
 
-  if(주소 === '네이버'){
-    성공(주소);
-  }else{
-    실패();
-  }
-
+const defaultOptions = {
+  url: "",
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+  },
+  body: null,
 };
 
-movePage(
-  '네이바',
-  (주소)=>{
-    console.log('3초후 '+ 주소 +'로 이동합니다.');
-    setTimeout(() => {
-      window.location.href = 'https://www.naver.com/'
-    }, 3000);
-  }
-  ,
-  ()=>{
-    console.log('잘못된 주소를 입력했습니다.');
-  })
+export function xhrPromise(options = {}) {
+  const xhr = new XMLHttpRequest();
 
+  const { method, url, body, headers } = Object.assign(
+    {},
+    defaultOptions,
+    options
+  );
 
- */
+  if (!url) typeError("서버와 통신할 url 인자는 반드시 필요합니다.");
+
+  xhr.open(method, url);
+
+  xhr.send(body ? JSON.stringify(body) : null);
+
+  return new Promise((resolve, reject) => {
+    xhr.addEventListener("readystatechange", () => {
+      const { status, readyState, response } = xhr;
+
+      if (status >= 200 && status < 400) {
+        if (readyState === 4) {
+          resolve(JSON.parse(response));
+        }
+      } else {
+        reject("에러입니다.");
+      }
+    });
+  });
+}
+
+// xhrPromise({
+//   url:'https://jsonplaceholder.typicode.com/users/1'
+// })
+// .then((res)=>{
+//   console.log(res);
+// })
+// .catch((err)=>{
+//   console.log(err);
+// })
+
+xhrPromise.get = (url) => {
+  return xhrPromise({
+    url,
+  });
+};
+
+xhrPromise.post = (url, body) => {
+  return xhrPromise({
+    url,
+    body,
+    method: "POST",
+  });
+};
+
+xhrPromise.put = (url, body) => {
+  return xhrPromise({
+    url,
+    body,
+    method: "PUT",
+  });
+};
+
+xhrPromise.delete = (url) => {
+  return xhrPromise({
+    url,
+    method: "DELETE",
+  });
+};
